@@ -18,7 +18,7 @@ module Gmail
         defaults       = {}
         @username      = fill_username(username)
         @options       = defaults.merge(options)
-        @mailbox_mutex = Mutex.new
+        @mailbox_monitor = Monitor.new
       end
       
       # Connect to gmail service. 
@@ -151,7 +151,7 @@ module Gmail
       #     ...
       #   end
       def mailbox(name, &block)
-        @mailbox_mutex.synchronize do
+        @mailbox_monitor.synchronize do
           name = Net::IMAP.encode_utf7(name.to_s)
           mailbox = (mailboxes[name] ||= Mailbox.new(self, name))
           switch_to_mailbox(name) if @current_mailbox != name
